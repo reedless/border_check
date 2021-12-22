@@ -24,23 +24,28 @@ def main():
             continue
         filename = f"{test_dir}/{i}"
         lines, cdst = check_border(filename)
+        max_lines = 50
 
         if i[:6] == 'border':
-            if lines is None:
+            if lines is None or len(lines) > max_lines:
                 print(f"{i} is incorrect")
-                cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
+                if lines is not None:
+                    print(len(lines))
+                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
                 FN += 1
             else:
-                cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
+                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
                 print(len(lines))
                 TP += 1
         else:
-            if lines is not None and len(lines) < 100: # 100 is arbitrary, can adjust
+            if lines is not None and len(lines) <= max_lines:
                 print(f"{i} is incorrect")
-                print(len(lines))
-                cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
+                # print(len(lines))
+                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
                 FP += 1
             else:
+                # if lines is not None:
+                #     print(len(lines))
                 TN += 1
 
     print(f"TP: {TP}, TN: {TN}, FP: {FP}, FN: {FN}")
@@ -51,13 +56,34 @@ def check_border(filename):
     dst = cv.Canny(src, 50, 200, None, 3)
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
 
+    threshold = 80
+
     # vertical lines
-    vert_lines = cv.HoughLines(dst, rho=1, theta=np.pi/90, threshold=150, min_theta=0, max_theta=np.pi/45)
+    vert_lines_1 = cv.HoughLines(dst, rho=1, theta=np.pi/180, threshold=threshold, min_theta=0, max_theta=np.pi/180*5)
+    vert_lines_2 = cv.HoughLines(dst, rho=1, theta=np.pi/180, threshold=threshold, min_theta=np.pi/180*175, max_theta=np.pi)
+    if vert_lines_1 is not None:
+        if vert_lines_2 is not None:
+            vert_lines = np.concatenate((vert_lines_1, vert_lines_2), axis=0)
+        else:
+            vert_lines = vert_lines_1
+    elif vert_lines_2 is not None:
+        vert_lines = vert_lines_2
+    else:
+        vert_lines = None
 
     # horizontal lines
-    hor_lines = cv.HoughLines(dst, rho=1, theta=np.pi/90, threshold=150, min_theta=np.pi/2-np.pi/90, max_theta=np.pi/2+np.pi/90)
+    hor_lines = cv.HoughLines(dst, rho=1, theta=np.pi/180, threshold=threshold, min_theta=np.pi/180*85, max_theta=np.pi/180*95)
 
-    lines = np.concatenate((vert_lines, hor_lines))l
+    # concat vertical and horizxonal lines if they are not none
+    if vert_lines is not None:
+        if hor_lines is not None:
+            lines = np.concatenate((vert_lines, hor_lines))
+        else:
+            lines = vert_lines
+    elif hor_lines is not None:
+        lines = hor_lines
+    else:
+        lines = None
 
     if lines is not None:
         for i in range(0, len(lines)):
@@ -71,7 +97,7 @@ def check_border(filename):
             pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
             cv.line(cdst, pt1, pt2, (0,0,255), 3, cv.LINE_AA)
 
-    return lines, cdst,
+    return lines, cdst
     
     
     
