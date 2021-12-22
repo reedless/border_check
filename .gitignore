@@ -1,0 +1,8 @@
+app/all_border_dataset_2000/
+app/curated_border_dataset_cache/
+.idea
+.git
+app/__pycache__/
+app/bccaas_api/
+app/bccaas_engine/
+app/enimda/
