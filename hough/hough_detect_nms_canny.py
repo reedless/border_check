@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 def main():
-    loop(130, 5, 5)
+    loop(130, 15, 5)
     # best = 0
     # res = (0, 0, 0, 0)
     # for threshold in range(100, 141, 10):
@@ -42,23 +42,28 @@ def loop(threshold, max_lines, k=4):
         vert_lines, hor_lines, cdst = check_border(filename, threshold, k)
 
         if i[:6] == 'border':
-            if not has_border(vert_lines, max_lines) and not has_border(hor_lines, max_lines):
-                # print(f"{i} is incorrect")
-                # if vert_lines is not None:
-                #     print(len(vert_lines))
-                # if hor_lines is not None:
-                #     print(len(hor_lines))
+            if not has_border(vert_lines, hor_lines, max_lines):
+                print(f"{i} is incorrect")
+                if vert_lines is not None:
+                    print(len(vert_lines))
+                if hor_lines is not None:
+                    print(len(hor_lines))
+                cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
                 FN += 1
             else:
-                # print(len(lines))
+                print(f"{i} is correct")
+                if vert_lines is not None:
+                    print(len(vert_lines))
+                if hor_lines is not None:
+                    print(len(hor_lines))
                 TP += 1
         else:
-            if has_border(vert_lines, max_lines) or has_border(hor_lines, max_lines):
-                # print(f"{i} is incorrect")
-                # if vert_lines is not None:
-                #     print(len(vert_lines))
-                # if hor_lines is not None:
-                #     print(len(hor_lines))
+            if has_border(vert_lines, hor_lines, max_lines):
+                print(f"{i} is incorrect")
+                if vert_lines is not None:
+                    print(len(vert_lines))
+                if hor_lines is not None:
+                    print(len(hor_lines))
                 FP += 1
             else:
                 # if lines is not None:
@@ -68,13 +73,33 @@ def loop(threshold, max_lines, k=4):
     print(f"TP: {TP}, TN: {TN}, FP: {FP}, FN: {FN}")
     return TP, TN, FP, FN
     
-def has_border(lines, max_lines):
-    return lines is not None and len(lines) < max_lines
+def has_border(vert_lines, hor_lines, max_lines, noise_threshold=100):
+    vert_pass = False
+    hor_pass = False
+    if vert_lines is not None:
+        if len(vert_lines) < max_lines:
+            vert_pass = True
+        if len(vert_lines) > max_lines + noise_threshold:
+            return False
+    if hor_lines is not None:
+        if len(hor_lines) < max_lines:
+            hor_pass = True
+        if len(hor_lines) > max_lines + noise_threshold:
+            return False
+    return vert_pass or hor_pass
+    
+
+# def has_border(lines, max_lines):
+#     return lines is not None and len(lines) < max_lines
 
 def check_border(filename, threshold=100, k=4):
 
     src = cv.imread(filename, cv.IMREAD_GRAYSCALE)
-    dst = cv.Canny(src, 50, 200, None, 3)
+
+    high_thresh, _ = cv.threshold(src, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+    lowThresh = 0.5*high_thresh
+    dst = cv.Canny(src, lowThresh, high_thresh, None, 3)
+
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
 
     # vertical lines
@@ -91,13 +116,13 @@ def check_border(filename, threshold=100, k=4):
         vert_lines = None
 
     # choose top k confidence vertical lines which are distinct
-    vert_lines = top_k(vert_lines, k)
+    # vert_lines = top_k(vert_lines, k)
 
     # horizontal lines
     hor_lines = cv.HoughLines(dst, rho=1, theta=np.pi/180, threshold=threshold, min_theta=np.pi/180*85, max_theta=np.pi/180*95)
 
     # choose top k confidence horizontal lines which are distinct
-    hor_lines = top_k(hor_lines, k)
+    # hor_lines = top_k(hor_lines, k)
 
     # concat vertical and horizxonal lines if they are not none
     if vert_lines is not None:
