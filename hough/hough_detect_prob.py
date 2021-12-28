@@ -14,7 +14,7 @@ def main():
     FN = 0
 
     # test_dir= 'app/curated_border_dataset_cache'
-    test_dir= 'app/all_border_dataset_2000'
+    test_dir= '../app/all_border_dataset_2000'
 
     for i in sorted(os.listdir(test_dir)):
         if i[-15:] == 'Zone.Identifier':

@@ -21,7 +21,7 @@ import numpy as np
 
 # img = cv2.imread("app/img.jpg", -1)
 
-img = cv2.imread("app/img.jpg")
+img = cv2.imread("../app/img.jpg")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (3, 3), 0)
 canny  = cv2.Canny(blurred, 75, 150)
@@ -48,7 +48,7 @@ cv2.imwrite('image.jpg', img)
 # FP = 0
 # FN = 0
 
-# test_dir= 'app/all_border_dataset_2000'
+# test_dir= '../app/all_border_dataset_2000'
 
 # for i in sorted(os.listdir(test_dir)):
 #     if i[-15:] == 'Zone.Identifier':

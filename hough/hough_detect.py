@@ -1,12 +1,27 @@
-import sys
 import math
 import cv2 as cv
 import numpy as np
 import os
-from app.bccaas_engine.upload import UploadFile
-
 
 def main():
+    loop(130, 20)
+    # best = 0
+    # res = (0, 0, 0, 0)
+    # for threshold in range(50, 141, 5):
+    #     for max_lines in range(10, 51, 5):
+    #         print(threshold, max_lines)
+    #         TP, TN, _, _ = loop(threshold, max_lines)
+    #         metric = TP*18 + TN
+    #         if metric > best:
+    #             best = metric
+    #             print(TP, TN)
+    #             res = (TP, TN, threshold, max_lines)
+
+    # TP, TN, threshold, max_lines = res
+    # print(f"threshold={threshold}, max_lines={max_lines}")
+    # print(f"TP: {TP}, TN: {TN}, FP: {1802-TN}, FN: {200-TP}")
+
+def loop(threshold, max_lines):
 
     TP = 0
     TN = 0
@@ -14,7 +29,7 @@ def main():
     FN = 0
 
     # test_dir= 'app/curated_border_dataset_cache'
-    test_dir= 'app/all_border_dataset_2000'
+    test_dir= '../app/all_border_dataset_2000'
 
     for i in sorted(os.listdir(test_dir)):
         if i[-15:] == 'Zone.Identifier':
@@ -23,25 +38,21 @@ def main():
         if i[-10:] == '_lines.jpg':
             continue
         filename = f"{test_dir}/{i}"
-        lines, cdst = check_border(filename)
-        max_lines = 50
+        lines, cdst = check_border(filename, threshold)
 
         if i[:6] == 'border':
             if lines is None or len(lines) > max_lines:
-                print(f"{i} is incorrect")
-                if lines is not None:
-                    print(len(lines))
-                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
+                # print(f"{i} is incorrect")
+                # if lines is not None:
+                #     print(len(lines))
                 FN += 1
             else:
-                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
-                print(len(lines))
+                # print(len(lines))
                 TP += 1
         else:
             if lines is not None and len(lines) <= max_lines:
-                print(f"{i} is incorrect")
+                # print(f"{i} is incorrect")
                 # print(len(lines))
-                # cv.imwrite(f"{test_dir}/{i}_lines.jpg", cdst)
                 FP += 1
             else:
                 # if lines is not None:
@@ -49,14 +60,13 @@ def main():
                 TN += 1
 
     print(f"TP: {TP}, TN: {TN}, FP: {FP}, FN: {FN}")
+    return TP, TN, FP, FN
     
-def check_border(filename):
+def check_border(filename, threshold=100):
 
     src = cv.imread(filename, cv.IMREAD_GRAYSCALE)
     dst = cv.Canny(src, 50, 200, None, 3)
     cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-
-    threshold = 80
 
     # vertical lines
     vert_lines_1 = cv.HoughLines(dst, rho=1, theta=np.pi/180, threshold=threshold, min_theta=0, max_theta=np.pi/180*5)
