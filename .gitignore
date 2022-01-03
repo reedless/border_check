@@ -10,3 +10,4 @@ app/all_border_dataset_2000.zip
 app/all_border_dataset_2000_annotations.zip
 app/all_border_dataset_2000_annotations/
 app/all_border_dataset_2000_annotations_split/
+cnn/model_weights.pth
