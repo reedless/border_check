@@ -374,4 +374,4 @@ if __name__ == '__main__':
 
     print(losses)
 
-    model.save('model_weights.pth')
+    # model.save('model_weights.pth')

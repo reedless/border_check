@@ -5,6 +5,7 @@ from tqdm import tqdm
 from train import Model
 from utils import read_image
 
+
 model = Model.load('model_weights.pth', ['border'])
 dataset_dir = '../app/all_border_dataset_2000_annotations_split'
 
