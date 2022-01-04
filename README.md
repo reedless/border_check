@@ -1,6 +1,8 @@
 # Various methods for checking of borders in images
 app/ uses ENIMDA algorithm, also has dataset splitting notebook for CNN due to location of dataset (TODO: move it)
+
 cnn/ uses faster-rcnn resnet50 fpn
+
 hough/ uses Canny + Hough
 
 ## Results:
