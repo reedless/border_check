@@ -358,7 +358,7 @@ class Model:
         return images, targets
 
 if __name__ == '__main__':
-    dataset_dir = '../app/all_border_dataset_2000_annotations_split'
+    dataset_dir = '../all_border_dataset_2000_annotations_split'
     train_dataset = Dataset(f'{dataset_dir}/train/')
     val_dataset = Dataset(f'{dataset_dir}/val/')
 

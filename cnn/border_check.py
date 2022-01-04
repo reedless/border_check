@@ -7,7 +7,7 @@ from utils import read_image
 
 
 model = Model.load('model_weights.pth', ['border'])
-dataset_dir = '../app/all_border_dataset_2000_annotations_split'
+dataset_dir = '../all_border_dataset_2000_annotations_split'
 
 test_dataset = f'{dataset_dir}/test/'
 files = sorted(os.listdir(test_dataset), reverse=True)
