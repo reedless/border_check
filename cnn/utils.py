@@ -5,6 +5,9 @@ from glob import glob
 import cv2
 import pandas as pd
 from torchvision import transforms
+import matplotlib.pyplot as plt
+import torch
+import matplotlib.patches as patches
 
 
 def default_transforms():
@@ -59,3 +62,83 @@ def read_image(path):
         raise ValueError(f'Could not convert image color: {str(e)}')
 
     return rgb_image
+
+def reverse_normalize(image):
+    """Reverses the normalization applied on an image by the
+    :func:`detecto.utils.reverse_normalize` transformation. The image
+    must be a `torch.Tensor <https://pytorch.org/docs/stable/tensors.html>`_
+    object.
+    :param image: A normalized image.
+    :type image: torch.Tensor
+    :return: The image with the normalization undone.
+    :rtype: torch.Tensor
+    **Example**::
+        >>> import matplotlib.pyplot as plt
+        >>> from torchvision import transforms
+        >>> from detecto.utils import read_image, \\
+        >>>     default_transforms, reverse_normalize
+        >>> image = read_image('image.jpg')
+        >>> defaults = default_transforms()
+        >>> image = defaults(image)
+        >>> image = reverse_normalize(image)
+        >>> image = transforms.ToPILImage()(image)
+        >>> plt.imshow(image)
+        >>> plt.show()
+    """
+
+    reverse = transforms.Normalize(mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.255],
+                                   std=[1 / 0.229, 1 / 0.224, 1 / 0.255])
+    return reverse(image)
+
+def show_labeled_image(image, boxes, labels=None):
+    """Show the image along with the specified boxes around detected objects.
+    Also displays each box's label if a list of labels is provided.
+    :param image: The image to plot. If the image is a normalized
+        torch.Tensor object, it will automatically be reverse-normalized
+        and converted to a PIL image for plotting.
+    :type image: numpy.ndarray or torch.Tensor
+    :param boxes: A torch tensor of size (N, 4) where N is the number
+        of boxes to plot, or simply size 4 if N is 1.
+    :type boxes: torch.Tensor
+    :param labels: (Optional) A list of size N giving the labels of
+            each box (labels[i] corresponds to boxes[i]). Defaults to None.
+    :type labels: torch.Tensor or None
+    **Example**::
+        >>> from detecto.core import Model
+        >>> from detecto.utils import read_image
+        >>> from detecto.visualize import show_labeled_image
+        >>> model = Model.load('model_weights.pth', ['tick', 'gate'])
+        >>> image = read_image('image.jpg')
+        >>> labels, boxes, scores = model.predict(image)
+        >>> show_labeled_image(image, boxes, labels)
+    """
+
+    fig, ax = plt.subplots(1)
+    # If the image is already a tensor, convert it back to a PILImage
+    # and reverse normalize it
+    if isinstance(image, torch.Tensor):
+        image = reverse_normalize(image)
+        image = transforms.ToPILImage()(image)
+    ax.imshow(image)
+
+    # Show a single box or multiple if provided
+    if boxes.ndim == 1:
+        boxes = boxes.view(1, 4)
+
+    if labels is not None and not is_iterable(labels):
+        labels = [labels]
+
+    # Plot each box
+    for i in range(boxes.shape[0]):
+        box = boxes[i]
+        width, height = (box[2] - box[0]).item(), (box[3] - box[1]).item()
+        initial_pos = (box[0].item(), box[1].item())
+        rect = patches.Rectangle(initial_pos,  width, height, linewidth=1,
+                                 edgecolor='r', facecolor='none')
+        if labels:
+            ax.text(box[0] + 5, box[1] - 5, '{}'.format(labels[i]), color='red')
+
+        ax.add_patch(rect)
+
+    plt.show()
+

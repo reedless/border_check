@@ -13,3 +13,4 @@ all_border_dataset_2000_annotations_split/
 cnn/model_weights.pth
 cnn/__pycache__/
 .vscode
+cnn/*.jpg

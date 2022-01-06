@@ -134,6 +134,7 @@ class Model:
             classes=None,
             device=None,
             pretrained=True,
+            pretrained_backbone=True,
             model_name=DEFAULT):
         self._device = device if device else (
             torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
@@ -141,7 +142,7 @@ class Model:
         # Load a model pre-trained on COCO
         if model_name == self.DEFAULT:  # TODO: update docs when released
             self._model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-                pretrained=pretrained)
+                pretrained=pretrained, pretrained_backbone=pretrained_backbone)
         elif model_name == self.MOBILENET:
             self._model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(
                 pretrained=pretrained)
@@ -334,7 +335,7 @@ class Model:
 
     @staticmethod
     def load(file, classes):
-        model = Model(classes)
+        model = Model(classes, pretrained=False, pretrained_backbone=False)
         model._model.load_state_dict(
             torch.load(file, map_location=model._device))
         return model
