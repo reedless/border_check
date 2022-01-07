@@ -10,7 +10,7 @@ all_border_dataset_2000.zip
 all_border_dataset_2000_annotations.zip
 all_border_dataset_2000_annotations/
 all_border_dataset_2000_annotations_split/
-cnn/model_weights.pth
+cnn/model_weights*.pth
 cnn/__pycache__/
 .vscode
 cnn/*.jpg
