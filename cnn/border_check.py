@@ -7,6 +7,7 @@ from utils import read_image
 
 
 model = Model.load('model_weights.pth', ['border'])
+
 dataset_dir = '../all_border_dataset_2000_annotations_split'
 
 test_dataset = f'{dataset_dir}/test/'
@@ -17,8 +18,8 @@ border_filenames = [f[:-4] for f in files if f[-4:] == '.xml']
 positive_predictions = []
 for i in tqdm(range(len(border_filenames))):
     image = read_image(f'{test_dataset}/{border_filenames[i]}.jpg')
+    
     prediction = model.predict(image)
-    # labels, boxes, scores = prediction
     positive_predictions.append(prediction)
 
 # files which are not annotated -> don't have borders
@@ -30,9 +31,13 @@ for i in tqdm(range(len(negative_filenames))):
     negative_predictions.append(prediction)
 
 # filter out low confidence predictions
-thresh = 0.7
-positive_scores = [any(score > thresh) for _, _, score in positive_predictions]
+thresh = 0.8
+positive_scores = [any(score > thresh) for _, _, score in positive_predictions] # labels, boxes, scores = prediction
 negative_scores = [any(score > thresh) for _, _, score in negative_predictions]
+
+for i in range(len(positive_scores)):
+    if not positive_scores[i]:
+        print(border_filenames[i])
 
 # print results
 print(

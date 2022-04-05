@@ -7,9 +7,7 @@ import torchvision
 from torchvision import transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from tqdm import tqdm
-
 from utils import default_transforms, is_iterable, read_image, xml_to_csv
-
 
 class DataLoader(torch.utils.data.DataLoader):
     def __init__(self, dataset, **kwargs):
@@ -58,6 +56,14 @@ class Dataset(torch.utils.data.Dataset):
 
         img_name = os.path.join(self._root_dir, object_entries.iloc[0, 0])
         image = read_image(img_name)
+
+        # '''
+        # add encode to base64 then decode in order to mimic the environment of bccaas
+        # '''
+        # base64_img = base64.b64encode(image).decode('utf-8')
+        # buff = base64.b64decode(base64_img)
+        # im_np = np.frombuffer(buff, dtype=np.uint8)
+        # image = cv2.imdecode(im_np, flags=1)
 
         boxes = []
         labels = []
@@ -120,6 +126,7 @@ class Dataset(torch.utils.data.Dataset):
                     box = (box / scale_factor).long()
                     targets['boxes'][idx] = box
 
+
         return image, targets
 
 
@@ -134,6 +141,7 @@ class Model:
             classes=None,
             device=None,
             pretrained=True,
+            pretrained_backbone=True,
             model_name=DEFAULT):
         self._device = device if device else (
             torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
@@ -141,7 +149,7 @@ class Model:
         # Load a model pre-trained on COCO
         if model_name == self.DEFAULT:  # TODO: update docs when released
             self._model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-                pretrained=pretrained)
+                pretrained=pretrained, pretrained_backbone=pretrained_backbone)
         elif model_name == self.MOBILENET:
             self._model = torchvision.models.detection.fasterrcnn_mobilenet_v3_large_fpn(
                 pretrained=pretrained)
@@ -334,7 +342,7 @@ class Model:
 
     @staticmethod
     def load(file, classes):
-        model = Model(classes)
+        model = Model(classes, pretrained=False, pretrained_backbone=False)
         model._model.load_state_dict(
             torch.load(file, map_location=model._device))
         return model
@@ -374,4 +382,4 @@ if __name__ == '__main__':
 
     print(losses)
 
-    # model.save('model_weights.pth')
+    model.save('model_weights.pth')
