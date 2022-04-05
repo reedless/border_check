@@ -17,3 +17,5 @@ cnn/__pycache__/
 *.JPG
 *.png
 *.PNG
+.ipynb_checkpoints/*
+*.ipnyb
