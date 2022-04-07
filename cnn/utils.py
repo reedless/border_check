@@ -12,8 +12,15 @@ import matplotlib.patches as patches
 import base64
 import numpy as np
 
+mean1 = 0.485
+mean2 = 0.456
+mean3 = 0.406
+std1  = 0.229
+std2  = 0.224
+std3  = 0.225
+
 def default_transforms():
-    return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+    return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[mean1, mean2, mean3], std=[std1, std2, std3])])
 
 def xml_to_csv(xml_folder, output_file=None):
     xml_list = []
@@ -63,7 +70,8 @@ def read_image(path):
         base64_img = base64.b64encode(img_file.read()).decode('utf-8')
         buff = base64.b64decode(base64_img)
         im_np = np.frombuffer(buff, dtype=np.uint8)
-        return cv2.imdecode(im_np, flags=1)
+        image =  cv2.imdecode(im_np, flags=1)
+        return image
 
     # image = cv2.imread(path)
 
@@ -97,8 +105,8 @@ def reverse_normalize(image):
         >>> plt.show()
     """
 
-    reverse = transforms.Normalize(mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.255],
-                                   std=[1 / 0.229, 1 / 0.224, 1 / 0.255])
+    reverse = transforms.Normalize(mean=[-mean1 / std1, -mean2 / std2, -mean3 / 0.255],
+                                   std=[1 / std1, 1 / std2, 1 / 0.255])
     return reverse(image)
 
 def show_labeled_image(image, boxes, labels=None):

@@ -57,14 +57,6 @@ class Dataset(torch.utils.data.Dataset):
         img_name = os.path.join(self._root_dir, object_entries.iloc[0, 0])
         image = read_image(img_name)
 
-        # '''
-        # add encode to base64 then decode in order to mimic the environment of bccaas
-        # '''
-        # base64_img = base64.b64encode(image).decode('utf-8')
-        # buff = base64.b64decode(base64_img)
-        # im_np = np.frombuffer(buff, dtype=np.uint8)
-        # image = cv2.imdecode(im_np, flags=1)
-
         boxes = []
         labels = []
         for object_idx, row in object_entries.iterrows():
