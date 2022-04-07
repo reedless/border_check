@@ -12,12 +12,12 @@ import matplotlib.patches as patches
 import base64
 import numpy as np
 
-mean1 = 0.485
-mean2 = 0.456
-mean3 = 0.406
-std1  = 0.229
-std2  = 0.224
-std3  = 0.225
+mean1 = 0.5243
+mean2 = 0.5560
+mean3 = 0.6285
+std1  = 0.3167
+std2  = 0.3119
+std3  = 0.3056
 
 def default_transforms():
     return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=[mean1, mean2, mean3], std=[std1, std2, std3])])
